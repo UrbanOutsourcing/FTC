@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Autonomous(name="TeleOp Java", group="Linear Opmode")
+@Autonomous(name="ATOMTeleOp Java", group="Linear Opmode")
 
 public class ATOMTeleOp extends LinearOpMode {
 
@@ -78,6 +78,7 @@ public class ATOMTeleOp extends LinearOpMode {
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
             double rightPower;
+            float clawPosition;
 
             // Make a Square
             // leftPower  = 0.3;
@@ -99,6 +100,16 @@ public class ATOMTeleOp extends LinearOpMode {
              // - This requires no math, but it is hard to drive forward slowly and keep straight.
                   leftPower  = -gamepad1.left_stick_y ;
                   rightPower = -gamepad1.right_stick_y ;
+                  clawPosition = gamepad1.right_trigger;
+                  
+                  robot.leftClaw.setPosition(clawPosition);
+                  robot.rightClaw.setPosition(clawPosition);
+                  
+                  if( gamepad1.right_bumper) {
+                   // robot.liftArm.setPower(.1);
+                  }else {
+                   // robot.liftArm.setPower(.1);
+                  }
              
              
              ATOMDriveTrain.PDrive(leftPower,rightPower,0.0); // Move Forward for 5 Seconds

@@ -52,7 +52,7 @@ import com.qualcomm.robotcore.util.Range;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Autonomous(name="DriveTrainCall Java", group="Linear Opmode")
+@Autonomous(name="ATOMDriveTrainCall Java", group="Linear Opmode")
 
 public class ATOMDriveTrainCall extends LinearOpMode {
 
@@ -73,7 +73,7 @@ public class ATOMDriveTrainCall extends LinearOpMode {
         runtime.reset();
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive() && runtime.seconds() < 2) {
+        while (opModeIsActive() && runtime.seconds() < 1.5) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
@@ -87,12 +87,13 @@ public class ATOMDriveTrainCall extends LinearOpMode {
              telemetry.update();
              ATOMDriveTrain ATOMDriveTrain = new ATOMDriveTrain(robot) ;
              //DriveTrain.PDrive(leftPower,rightPower,5.0); // Move Forward for 5 Seconds
-             ATOMDriveTrain.EDrive(leftPower,24,24,5,90); // Move Forward for 5 Seconds
+             ATOMDriveTrain.EDrive(leftPower,10,10,0,19); // Move Forward for 5 Seconds
           
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
+            break;
         }
         
           

@@ -107,6 +107,9 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
     @Override
     public void runOpMode() {
         
+            double leftDistance = 0; 
+            double rightDistance =0;
+        
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
@@ -289,6 +292,10 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
             if (targetVisible) {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
+                
+                 leftDistance =  translation.get(0) / mmPerInch;
+                 rightDistance =  translation.get(0) / mmPerInch; 
+                
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
@@ -308,16 +315,21 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
             double rightPower;
+            
 
             // Make a Square
              leftPower  = 0.3;
              rightPower = 0.3 ;
-           
+             
+            
+             
              telemetry.addData("Calling", "DriveTrain");
              telemetry.update();
              ATOMDriveTrain ATOMDriveTrain = new ATOMDriveTrain(robot) ;
              //DriveTrain.PDrive(leftPower,rightPower,5.0); // Move Forward for 5 Seconds
-             ATOMDriveTrain.EDrive(leftPower,10,10,0,19); // Move Forward for 5 Seconds
+             
+             ATOMDriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Move Forward for 5 Seconds
+            
              DetectAsset ();
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());

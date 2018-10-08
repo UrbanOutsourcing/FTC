@@ -61,6 +61,9 @@ public class ATOMDriveTrainCall extends LinearOpMode {
     private DcMotor LeftDriveRear = null;
     private DcMotor RightDriveRear = null;
     private ATOMHardware robot   = new ATOMHardware();
+    //private ATOMHardware robot   = new ATOMHardware(1120,1,4);   // Override the Counts Per Revolution, Gear Reduction and Wheel Diameter properties of the Robot
+   
+
 
     @Override
     public void runOpMode() {
@@ -71,7 +74,8 @@ public class ATOMDriveTrainCall extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
-
+         
+         
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive() && runtime.seconds() < 1.5) {
 
@@ -87,7 +91,7 @@ public class ATOMDriveTrainCall extends LinearOpMode {
              telemetry.update();
              ATOMDriveTrain ATOMDriveTrain = new ATOMDriveTrain(robot) ;
              //DriveTrain.PDrive(leftPower,rightPower,5.0); // Move Forward for 5 Seconds
-             ATOMDriveTrain.EDrive(leftPower,10,10,0,19); // Move Forward for 5 Seconds
+             ATOMDriveTrain.EDrive(leftPower,6,6,0,0); // Move Forward for N  Inches or N Degrees
           
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());

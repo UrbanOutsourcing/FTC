@@ -79,9 +79,13 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor LeftDriveRear = null;
-    private DcMotor RightDriveRear = null;
-    private ATOMHardware robot   = new ATOMHardware();
+    //private DcMotor LeftDriveRear = null;
+    //private DcMotor RightDriveRear = null;
+      private  double leftDistance = 0; 
+      private  double rightDistance =0;
+      private List<VuforiaTrackable> allTrackables;
+      private ATOMHardware robot   = new ATOMHardware();
+      private ATOMDriveTrain DriveTrain;
 
 
     private static final String VUFORIA_KEY = "AU63SW3/////AAABmUFRPq/ohU8CpLVdaXLTNlg+DNBh3enzFq8SxmRlvTxY6QYiRY2ich0trSJ1UKpoAspqzCjBBiFPERZ5yhrSU8nLyN+mWAB8AU/oKCMl4IyVVqGcYVM4wu/fWzDp8ox/IiX5RzfvhvH0F0KpS3y9VGYIDwOactEIJEMzJYKmAAvGIJCME1YqYAIeoFr38DDpEkqf7gTA8qxQI8Y/AsUOD+v85DHAoGvQbj2JYneG7dZFWQNTk4TtQXW0WAO6bk5cBM9sS3PwokzGQ/N8GsWzGEe6MnpHB589KgY6b97xIhGV6ji1Dhkw+Jj5pg/FrmGOieaCxmiVTNcBIctv6hCJrN6jQOa13CbKkSDwKDTU1qli";
@@ -107,8 +111,8 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
     @Override
     public void runOpMode() {
         
-            double leftDistance = 0; 
-            double rightDistance =0;
+          //  double leftDistance = 0; 
+          //  double rightDistance =0;
         
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -254,7 +258,7 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        InitializeMotors();
+        InitializeRobot();
         runtime.reset();
 
 
@@ -271,7 +275,84 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
              
              sleep(1000);
              
-              // check all the trackable target to see which one (if any) is visible.
+             //DetectTarget (); // Detect Target and determine distance
+             // check all the trackable target to see which one (if any) is visible.
+            targetVisible = false;
+            for (VuforiaTrackable trackable : allTrackables) {
+                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
+                    telemetry.addData("Visible Target", trackable.getName());
+                    targetVisible = true;
+
+                    // getUpdatedRobotLocation() will return null if no new information is available since
+                    // the last time that call was made, or if the trackable is not currently visible.
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    if (robotLocationTransform != null) {
+                        lastLocation = robotLocationTransform;
+                    }
+                    break;
+                }
+            }
+
+            // Provide feedback as to where the robot is located (if we know).
+            if (targetVisible) {
+                // express position (translation) of robot in inches.
+                VectorF translation = lastLocation.getTranslation();
+                
+                 leftDistance =  translation.get(1) / mmPerInch;
+                 rightDistance =  translation.get(1) / mmPerInch; 
+                
+                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
+
+                // express the rotation of the robot in degrees.
+                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
+            }
+            else {
+                telemetry.addData("Visible Target", "none");
+            }
+            telemetry.update();
+             sleep(2000);
+             
+            // Setup a variable for each drive wheel to save power level for telemetry
+            double leftPower;
+            double rightPower;
+            
+             leftPower  = 0.3;
+             rightPower = 0.3 ;
+             
+             telemetry.addData("Calling", "DriveTrain");
+             telemetry.update();
+             
+             ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+             
+             
+             DriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Drive to Target
+            
+            
+            // Show the elapsed game time and wheel power.
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Motors", "TargetPosition (%.2f), Power (%.2f)", (double) robot.LeftDriveRear.getTargetPosition(), rightPower);
+            telemetry.update();
+            sleep(2000);
+            leftPower  = 0;
+            rightPower = 0;
+            break;
+            
+        }
+        
+          
+    }
+    
+     public void InitializeRobot() {
+        
+        robot.init(hardwareMap);
+        ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+         }
+     
+     public void DetectTarget () {
+      
+       // check all the trackable target to see which one (if any) is visible.
             targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
@@ -308,71 +389,7 @@ public class ATOMDriveTrainCall_Vuforia extends LinearOpMode {
             }
             telemetry.update();
      
-             sleep(2000);
-             
-             
-             
-            // Setup a variable for each drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
-            
-
-            // Make a Square
-             leftPower  = 0.3;
-             rightPower = 0.3 ;
-             
-            
-             
-             telemetry.addData("Calling", "DriveTrain");
-             telemetry.update();
-             ATOMDriveTrain ATOMDriveTrain = new ATOMDriveTrain(robot) ;
-             //DriveTrain.PDrive(leftPower,rightPower,5.0); // Move Forward for 5 Seconds
-             
-             ATOMDriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Move Forward for 5 Seconds
-            
-            // DetectAsset ();
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            telemetry.update();
-            
-            leftPower  = 0;
-            rightPower = 0;
-            
-            
-        }
-        
-          
-    }
-    
-     public void InitializeMotors() {
-        
-        robot.init(hardwareMap);
-        //LeftDriveRear  = hardwareMap.get(DcMotor.class, "LeftDriveRear");
-        //RightDriveRear = hardwareMap.get(DcMotor.class, "RightDriveRear");
-
-        // Most robots need the motor on one side to be reversed to drive forward
-        // Reverse the motor that runs backwards when connected directly to the battery
-        //LeftDriveRear.setDirection(DcMotor.Direction.FORWARD);
-        //RightDriveRear.setDirection(DcMotor.Direction.REVERSE);
-
-        
-         }
-     public void Drive(double Left, double Right,double timeoutS) {
-            runtime.reset();
-            while (runtime.seconds() < timeoutS) {
-                 // runtime.reset();
-                LeftDriveRear.setPower(Left);
-                RightDriveRear.setPower(Right);
-                
-               }
-               // Set Power to Zero
-                LeftDriveRear.setPower(0);
-                RightDriveRear.setPower(0);
-        
-         }
-     public void DetectAsset () {
-         
+           
      }         
            
 }

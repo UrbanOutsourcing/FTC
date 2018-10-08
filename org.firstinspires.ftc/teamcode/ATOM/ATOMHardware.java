@@ -34,7 +34,8 @@ public class ATOMHardware
     public DcMotor  RightDriveRear  = null;
     public DcMotor  LeftDriveFront   = null;
     public DcMotor  RightDriveFront  = null;
-    public Servo  liftArm     = null;
+    public DcMotor  liftArm     = null;
+    public DcMotor  takeArm     = null;
     public Servo  leftClaw    = null;
     public Servo  rightClaw   = null;
 
@@ -78,7 +79,8 @@ public class ATOMHardware
         RightDriveRear = hwMap.get(DcMotor.class, "RightDriveRear");
         LeftDriveFront  = hwMap.get(DcMotor.class, "LeftDriveFront");
         RightDriveFront = hwMap.get(DcMotor.class, "RightDriveFront");
-        liftArm    = hwMap.get(Servo.class, "left_hand");
+        liftArm    =      hwMap.get(DcMotor.class, "liftArm");
+        takeArm    =      hwMap.get(DcMotor.class, "takeArm");
         LeftDriveRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         RightDriveRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         LeftDriveFront.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
@@ -89,7 +91,9 @@ public class ATOMHardware
         RightDriveRear.setPower(0);
         LeftDriveFront.setPower(0);
         RightDriveFront.setPower(0);
-        //liftArm.setPower(0);
+        liftArm.setPower(0);
+        takeArm.setPower(0);
+        
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
@@ -97,7 +101,9 @@ public class ATOMHardware
         RightDriveRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LeftDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RightDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //liftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        takeArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        
 
         // Define and initialize ALL installed servos.
         leftClaw  = hwMap.get(Servo.class, "left_hand");

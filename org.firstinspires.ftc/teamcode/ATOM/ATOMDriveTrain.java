@@ -26,8 +26,8 @@ public class ATOMDriveTrain {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor LeftDriveRear = null;
-    private DcMotor RightDriveRear = null;
+    //private DcMotor LeftDriveRear = null;
+    //private DcMotor RightDriveRear = null;
     private ATOMHardware robot   = null;   // Use ATOM and EVE hardware
  
  
@@ -76,13 +76,8 @@ public class ATOMDriveTrain {
                
              while ((robot.LeftDriveRear.isBusy() & robot.RightDriveRear.isBusy() & robot.LeftDriveFront.isBusy() & robot.RightDriveFront.isBusy())) {
 
-                // Display it for the driver.
-                //telemetry.addData("Path1",  "Running to %7d :%7d", newLeftTarget,  newRightTarget);
-                //telemetry.addData("Path2",  "Running at %7d :%7d",
-                //                            robot.LeftDriveRear.getCurrent
-
-                //                            robot.RightDriveRear.getCurrentPosition());
-                //telemetry.update();
+                // Loop until the robot reaches the designated distance
+                
             }  
                // Set Power to Zero
             robot.LeftDriveRear.setPower(0);
@@ -139,6 +134,7 @@ public class ATOMDriveTrain {
               // Determine new target position, and pass to motor controller
               
               targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (degrees/(int) 45)) - 1;
+              
               newLeftTarget = robot.LeftDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
               newRightTarget = robot.RightDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
               robot.LeftDriveRear.setTargetPosition(newLeftTarget);

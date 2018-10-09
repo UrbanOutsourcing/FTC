@@ -80,21 +80,24 @@ public class ATOMTeleOp extends LinearOpMode {
         
          }
      
-    public void OperateExtensions() {
+     public void OperateExtensions() {
         
                   clawPosition = gamepad2.left_trigger;  // Operate Claw using Servos
                   robot.leftClaw.setPosition(clawPosition);
                   robot.rightClaw.setPosition(clawPosition);
                   
-                  if( gamepad2.right_bumper) {
-                    robot.liftArm.setPower(-gamepad2.right_stick_y);   //Raise liftArm using DcMotors
-                  }else {
-                    robot.liftArm.setPower(gamepad2.right_stick_y);    //Lower liftArm using DcMotors
-                  }
-                  if( gamepad2.left_bumper) {
-                    robot.takeArm.setPower(-gamepad2.left_stick_y);   //Outtake takeArm  using DcMotors
-                  }else {
-                    robot.takeArm.setPower(gamepad2.left_stick_y);    //Intake  takeArm  using DcMotors
-                  }
+                 // if( gamepad2.right_bumper) {
+                 //   robot.liftArm.setPower(-gamepad2.right_stick_y);   //Raise liftArm using DcMotors
+                 // }else {
+                 //   robot.liftArm.setPower(gamepad2.right_stick_y);    //Lower liftArm using DcMotors
+                //  }
+                 // if( gamepad2.left_bumper) {
+                 //   robot.takeArm.setPower(-gamepad2.left_stick_y);   //Outtake takeArm  using DcMotors
+                //  }else {
+                //    robot.takeArm.setPower(gamepad2.left_stick_y);    //Intake  takeArm  using DcMotors
+                //  }
+                  robot.pivot.setPosition(.5);
+                  if( gamepad2.dpad_left)  { robot.pivot.setPosition(0);  }; //Pivot Arm Initial Position
+                  if( gamepad2.dpad_right) { robot.pivot.setPosition(1);  }; //Pivot Arm Full  Position
          }    
 }

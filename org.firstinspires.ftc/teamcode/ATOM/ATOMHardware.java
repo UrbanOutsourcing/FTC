@@ -83,10 +83,10 @@ public class ATOMHardware
         RightDriveFront = hwMap.get(DcMotor.class, "RightDriveFront");
         //liftArm    =      hwMap.get(DcMotor.class, "liftArm");
         //takeArm    =      hwMap.get(DcMotor.class, "takeArm");
-        LeftDriveRear.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        RightDriveRear.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
-        LeftDriveFront.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        RightDriveFront.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        LeftDriveRear.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        RightDriveRear.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        LeftDriveFront.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+        RightDriveFront.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
         LeftDriveRear.setPower(0);

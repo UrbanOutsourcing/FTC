@@ -65,7 +65,7 @@ public class ATOMDriveTrain {
             InitializeEncoders(leftInches, rightInches,degrees); 
             
             if(degrees >0){ 
-                pSpeed = .2;
+                pSpeed = .2; //Set turning speed
             }  
             
             robot.LeftDriveRear.setPower(Math.abs(pSpeed));
@@ -74,7 +74,7 @@ public class ATOMDriveTrain {
             robot.RightDriveFront.setPower(Math.abs(pSpeed));
            
                
-             while ((robot.LeftDriveRear.isBusy() & robot.RightDriveRear.isBusy() & robot.LeftDriveFront.isBusy() & robot.RightDriveFront.isBusy())) {
+             while (robot.LeftDriveRear.isBusy() & robot.RightDriveRear.isBusy()) {
 
                 // Loop until the robot reaches the designated distance
                 
@@ -130,20 +130,28 @@ public class ATOMDriveTrain {
               robot.RightDriveFront.setTargetPosition(newRightTarget);
             }
               else {
-             
+                  targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (Math.abs(degrees)/(int) 45)) - 2; 
+                 if(degrees > 0) { 
               // Determine new target position, and pass to motor controller
               
-              targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (degrees/(int) 45)) - 1;
+                  newLeftTarget = robot.LeftDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+                  newRightTarget = robot.RightDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+                  newLeftTarget = robot.LeftDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+                  newRightTarget = robot.RightDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+              }
+                else {
+                 newLeftTarget = robot.LeftDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+                 newRightTarget = robot.RightDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+                 newLeftTarget = robot.LeftDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+                 newRightTarget = robot.RightDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+              }
+             
+             robot.LeftDriveFront.setTargetPosition(newLeftTarget);
+             robot.RightDriveFront.setTargetPosition(newRightTarget);
+             robot.LeftDriveRear.setTargetPosition(newLeftTarget);
+             robot.RightDriveRear.setTargetPosition(newRightTarget);
               
-              newLeftTarget = robot.LeftDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
-              newRightTarget = robot.RightDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
-              robot.LeftDriveRear.setTargetPosition(newLeftTarget);
-              robot.RightDriveRear.setTargetPosition(newRightTarget);
-            
-              newLeftTarget = robot.LeftDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
-              newRightTarget = robot.RightDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
-              robot.LeftDriveFront.setTargetPosition(newLeftTarget);
-              robot.RightDriveFront.setTargetPosition(newRightTarget);
+              
              
              
              

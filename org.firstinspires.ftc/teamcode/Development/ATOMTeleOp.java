@@ -77,7 +77,7 @@ public class ATOMTeleOp extends LinearOpMode {
      public void InitializeMotors() {
         
         robot.init(hardwareMap);
-        
+         robot.pivot.setPosition(.5);
          }
      
      public void OperateExtensions() {

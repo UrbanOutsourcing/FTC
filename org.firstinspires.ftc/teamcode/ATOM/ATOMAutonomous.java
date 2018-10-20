@@ -88,7 +88,7 @@ public class ATOMAutonomous extends LinearOpMode {
       private ATOMDriveTrain DriveTrain;
       
       //Location Variables
-      private double distanceToDepot = 28;
+      private double distanceToDepot = 36;
       private double distanceToCrater = -2.5 * distanceToDepot;
 
 

@@ -113,7 +113,7 @@ public class ATOMHardware
         pivot = hwMap.get(Servo.class, "pivot");
         leftClaw.setPosition(MID_SERVO);
         rightClaw.setPosition(MID_SERVO);
-        pivot.setPosition(0);
+        pivot.setPosition(.5);
     }
  }
 

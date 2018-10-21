@@ -86,9 +86,10 @@ public class ATOMAutonomous extends LinearOpMode {
       private List<VuforiaTrackable> allTrackables;
       private ATOMHardware robot   = new ATOMHardware();
       private ATOMDriveTrain DriveTrain;
+      private String target = null;
       
       //Location Variables
-      private double distanceToDepot = 36;
+      private double distanceToDepot = 48;
       private double distanceToCrater = -2.5 * distanceToDepot;
 
 
@@ -243,7 +244,7 @@ public class ATOMAutonomous extends LinearOpMode {
          * In this example, it is centered (left to right), but 110 mm forward of the middle of the robot, and 200 mm above ground level.
          */
 
-        final int CAMERA_FORWARD_DISPLACEMENT  = 110;   // eg: Camera is 110 mm in front of robot center
+        final int CAMERA_FORWARD_DISPLACEMENT  = 75;   // eg: Camera is 110 mm in front of robot center
         final int CAMERA_VERTICAL_DISPLACEMENT = 100;   // eg: Camera is 200 mm above ground
         final int CAMERA_LEFT_DISPLACEMENT     = 150;     // eg: Camera is ON the robot's center line
 
@@ -286,6 +287,7 @@ public class ATOMAutonomous extends LinearOpMode {
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
+                    target = trackable.getName();
                     targetVisible = true;
 
                     // getUpdatedRobotLocation() will return null if no new information is available since
@@ -303,8 +305,19 @@ public class ATOMAutonomous extends LinearOpMode {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 
-                 leftDistance =  (translation.get(1) / mmPerInch) + 1;
-                 rightDistance = translation.get(1) / mmPerInch   + 1 ; 
+               // if (target == "Blue-Rover") {
+                
+                // leftDistance =  (translation.get(1) / mmPerInch) + 3;
+                // rightDistance = translation.get(1) / mmPerInch   + 3; 
+                    
+                //}
+                
+               // else {
+               
+                    leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
+                    rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
+                  
+               // }
                 
                 telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);

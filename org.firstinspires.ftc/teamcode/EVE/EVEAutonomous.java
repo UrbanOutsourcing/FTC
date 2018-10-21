@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.ATOM;
+package org.firstinspires.ftc.teamcode.EVE;
 
 //import org.firstinspires.ftc.teamcode.ATOM.*;
 
@@ -73,9 +73,9 @@ import java.util.List;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Autonomous(name="ATOMAutonomous Java", group="Linear Opmode")
+@Autonomous(name="EVEAutonomous Java", group="Linear Opmode")
 
-public class ATOMAutonomous extends LinearOpMode {
+public class EVEAutonomous extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -84,8 +84,8 @@ public class ATOMAutonomous extends LinearOpMode {
       private  double leftDistance = 0; 
       private  double rightDistance =0;
       private List<VuforiaTrackable> allTrackables;
-      private ATOMHardware robot   = new ATOMHardware();
-      private ATOMDriveTrain DriveTrain;
+      private EVEHardware robot   = new EVEHardware();
+      private EVEDriveTrain DriveTrain;
       private String target = null;
       
       //Location Variables
@@ -342,7 +342,7 @@ public class ATOMAutonomous extends LinearOpMode {
              telemetry.addData("Calling", "DriveTrain");
              telemetry.update();
              
-             ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+             EVEDriveTrain DriveTrain = new EVEDriveTrain(robot) ;
              
              
              DriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Drive to Target
@@ -375,7 +375,7 @@ public class ATOMAutonomous extends LinearOpMode {
      public void InitializeRobot() {
         
         robot.init(hardwareMap);
-        ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+        EVEDriveTrain DriveTrain = new EVEDriveTrain(robot) ;
          }
      
      public void DetectTarget () {

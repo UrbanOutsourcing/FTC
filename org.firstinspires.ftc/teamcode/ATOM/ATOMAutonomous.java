@@ -87,6 +87,7 @@ public class ATOMAutonomous extends LinearOpMode {
       private ATOMHardware robot   = new ATOMHardware();
       private ATOMDriveTrain DriveTrain;
       private String target = null;
+      private float rotationAngle = 45;
       
       //Location Variables
       private double distanceToDepot = 48;
@@ -280,6 +281,8 @@ public class ATOMAutonomous extends LinearOpMode {
              
              sleep(1000);
              
+             ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+             
              //DetectTarget (); // Detect Target and determine distance
              // check all the trackable target to see which one (if any) is visible.
             
@@ -305,25 +308,16 @@ public class ATOMAutonomous extends LinearOpMode {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 
-               // if (target == "Blue-Rover") {
-                
-                // leftDistance =  (translation.get(1) / mmPerInch) + 3;
-                // rightDistance = translation.get(1) / mmPerInch   + 3; 
-                    
-                //}
-                
-               // else {
-               
-                    leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
-                    rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
+                leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
+                rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
                   
-               // }
-                
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+               telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                
+                rotationAngle = rotation.thirdAngle;
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             }
             else {
@@ -342,7 +336,7 @@ public class ATOMAutonomous extends LinearOpMode {
              telemetry.addData("Calling", "DriveTrain");
              telemetry.update();
              
-             ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
+            DriveTrain.EDrive(.2,0,0,0,(double) rotationAngle); // Turn 45 degrees to align with image
              
              
              DriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Drive to Target

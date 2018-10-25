@@ -35,12 +35,12 @@ public class ATOMHardware
     public DcMotor  RightDriveRear  = null;
     public DcMotor  LeftDriveFront   = null;
     public DcMotor  RightDriveFront  = null;
-    //public DcMotor  liftArm   = null;
-    //public DcMotor  takeArm   = null;
+        //public DcMotor  takeArm   = null;
     public Servo    leftClaw    = null;
     public Servo    rightClaw   = null;
-    public Servo  pivot         = null;
-
+    public Servo    pivot       = null;
+    public Servo    liftArm     = null;
+    
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
@@ -111,9 +111,11 @@ public class ATOMHardware
         leftClaw  = hwMap.get(Servo.class, "left_hand");
         rightClaw = hwMap.get(Servo.class, "right_hand");
         pivot = hwMap.get(Servo.class, "pivot");
+        liftArm = hwMap.get(Servo.class, "liftarm");
         leftClaw.setPosition(MID_SERVO);
         rightClaw.setPosition(MID_SERVO);
         pivot.setPosition(.5);
+        liftArm.setPosition(.5);
     }
  }
 

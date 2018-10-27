@@ -35,12 +35,12 @@ public class EVEHardware
     public DcMotor  RightDriveRear  = null;
     public DcMotor  LeftDriveFront   = null;
     public DcMotor  RightDriveFront  = null;
-    //public DcMotor  liftArm   = null;
-    //public DcMotor  takeArm   = null;
+        //public DcMotor  takeArm   = null;
     public Servo    leftClaw    = null;
     public Servo    rightClaw   = null;
-    public Servo  pivot         = null;
-
+    public Servo    pivot       = null;
+    public DcMotor  liftArm     = null;
+    
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
@@ -77,33 +77,34 @@ public class EVEHardware
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        LeftDriveRear  = hwMap.get(DcMotor.class, "LeftDriveRear");
-        RightDriveRear = hwMap.get(DcMotor.class, "RightDriveRear");
+       // LeftDriveRear  = hwMap.get(DcMotor.class, "LeftDriveRear");
+       // RightDriveRear = hwMap.get(DcMotor.class, "RightDriveRear");
         LeftDriveFront  = hwMap.get(DcMotor.class, "LeftDriveFront");
         RightDriveFront = hwMap.get(DcMotor.class, "RightDriveFront");
-        //liftArm    =      hwMap.get(DcMotor.class, "liftArm");
+        
+        liftArm    =      hwMap.get(DcMotor.class, "Lift");
         //takeArm    =      hwMap.get(DcMotor.class, "takeArm");
-        LeftDriveRear.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-        RightDriveRear.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+       // LeftDriveRear.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+       // RightDriveRear.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         LeftDriveFront.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         RightDriveFront.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
 
         // Set all motors to zero power
-        LeftDriveRear.setPower(0);
-        RightDriveRear.setPower(0);
+        //LeftDriveRear.setPower(0);
+        //RightDriveRear.setPower(0);
         LeftDriveFront.setPower(0);
         RightDriveFront.setPower(0);
-        //liftArm.setPower(0);
+        liftArm.setPower(0);
         //takeArm.setPower(0);
         
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        LeftDriveRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RightDriveRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //LeftDriveRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //RightDriveRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LeftDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RightDriveFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //liftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //takeArm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         
 
@@ -111,9 +112,11 @@ public class EVEHardware
         leftClaw  = hwMap.get(Servo.class, "left_hand");
         rightClaw = hwMap.get(Servo.class, "right_hand");
         pivot = hwMap.get(Servo.class, "pivot");
+        //liftArm = hwMap.get(DcMotor.class, "lift");
         leftClaw.setPosition(MID_SERVO);
         rightClaw.setPosition(MID_SERVO);
-        pivot.setPosition(.5);
+        pivot.setPosition(1);
+       
     }
  }
 

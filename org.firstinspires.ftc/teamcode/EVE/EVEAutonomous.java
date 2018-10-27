@@ -81,16 +81,17 @@ public class EVEAutonomous extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     //private DcMotor LeftDriveRear = null;
     //private DcMotor RightDriveRear = null;
-      private  double leftDistance = 0; 
-      private  double rightDistance =0;
+      private  double leftDistance = 30; 
+      private  double rightDistance =30;
       private List<VuforiaTrackable> allTrackables;
       private EVEHardware robot   = new EVEHardware();
       private EVEDriveTrain DriveTrain;
       private String target = null;
+      private float rotationAngle = 45;
       
       //Location Variables
       private double distanceToDepot = 48;
-      private double distanceToCrater = -2.5 * distanceToDepot;
+      private double distanceToCrater = -2 * distanceToDepot;
 
 
     private static final String VUFORIA_KEY = "AU63SW3/////AAABmUFRPq/ohU8CpLVdaXLTNlg+DNBh3enzFq8SxmRlvTxY6QYiRY2ich0trSJ1UKpoAspqzCjBBiFPERZ5yhrSU8nLyN+mWAB8AU/oKCMl4IyVVqGcYVM4wu/fWzDp8ox/IiX5RzfvhvH0F0KpS3y9VGYIDwOactEIJEMzJYKmAAvGIJCME1YqYAIeoFr38DDpEkqf7gTA8qxQI8Y/AsUOD+v85DHAoGvQbj2JYneG7dZFWQNTk4TtQXW0WAO6bk5cBM9sS3PwokzGQ/N8GsWzGEe6MnpHB589KgY6b97xIhGV6ji1Dhkw+Jj5pg/FrmGOieaCxmiVTNcBIctv6hCJrN6jQOa13CbKkSDwKDTU1qli";
@@ -103,7 +104,7 @@ public class EVEAutonomous extends LinearOpMode {
 
     // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
     // Valid choices are:  BACK or FRONT
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = FRONT;
 
     private OpenGLMatrix lastLocation = null;
     private boolean targetVisible = false;
@@ -246,7 +247,7 @@ public class EVEAutonomous extends LinearOpMode {
 
         final int CAMERA_FORWARD_DISPLACEMENT  = 75;   // eg: Camera is 110 mm in front of robot center
         final int CAMERA_VERTICAL_DISPLACEMENT = 100;   // eg: Camera is 200 mm above ground
-        final int CAMERA_LEFT_DISPLACEMENT     = 150;     // eg: Camera is ON the robot's center line
+        final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -279,6 +280,25 @@ public class EVEAutonomous extends LinearOpMode {
         while (opModeIsActive()) {
              
              sleep(1000);
+             robot.leftClaw.setPosition(1);
+             robot.liftArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+             robot.liftArm.setTargetPosition(6000);
+             robot.liftArm.setPower(.5);
+             while (robot.liftArm.isBusy()) {
+
+                // Loop until the robot reaches the designated distance
+                
+            }  
+             sleep(7200);
+             
+             robot.liftArm.setPower(0);
+             EVEDriveTrain DriveTrain = new EVEDriveTrain(robot) ;
+             
+             robot.pivot.setPosition(0);
+             robot.pivot.setPosition(1); 
+             
+             DriveTrain.EDrive(.2,0,0,0,-22.5); // unlatch from hook
+             
              
              //DetectTarget (); // Detect Target and determine distance
              // check all the trackable target to see which one (if any) is visible.
@@ -305,25 +325,16 @@ public class EVEAutonomous extends LinearOpMode {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 
-               // if (target == "Blue-Rover") {
-                
-                // leftDistance =  (translation.get(1) / mmPerInch) + 3;
-                // rightDistance = translation.get(1) / mmPerInch   + 3; 
-                    
-                //}
-                
-               // else {
-               
-                    leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
-                    rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
+                leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
+                rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
                   
-               // }
-                
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+               telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
+                
+                rotationAngle = rotation.thirdAngle;
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             }
             else {
@@ -336,23 +347,35 @@ public class EVEAutonomous extends LinearOpMode {
             double leftPower;
             double rightPower;
             
-             leftPower  = 0.3;
+             leftPower  = 0.5;
              rightPower = 0.3 ;
              
              telemetry.addData("Calling", "DriveTrain");
              telemetry.update();
              
-             EVEDriveTrain DriveTrain = new EVEDriveTrain(robot) ;
+            //DriveTrain.EDrive(.2,0,0,0,(double) rotationAngle); // Turn 45 degrees to align with image
              
              
              DriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Drive to Target
-             sleep(2000);
-             DriveTrain.EDrive(leftPower,0,0,0,90); // Right Turn
              sleep(1000);
+             DriveTrain.EDrive(leftPower,0,0,0,-50); // Right Turn
              
+             
+             
+             robot.liftArm.setTargetPosition(-6000);
+             robot.liftArm.setPower(.5);
              
              DriveTrain.EDrive(leftPower,distanceToDepot,distanceToDepot,0,0); // Drive to Depot
              // Place code here to drop Marker
+             
+             robot.pivot.setPosition(.5);
+             robot.pivot.setPosition(0);              //Pivot Arm Initial Position
+             sleep(500);
+             robot.pivot.setPosition(.5);
+             robot.leftClaw.setPosition(0);
+             sleep(500);
+             robot.leftClaw.setPosition(1);
+            
              
              //Set distance to Reverse to 
              

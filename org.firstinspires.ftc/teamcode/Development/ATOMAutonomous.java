@@ -282,7 +282,10 @@ public class ATOMAutonomous extends LinearOpMode {
              sleep(1000);
              
              ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
-             
+                DriveTrain.EDrive(0.5,36,36,0,0); // Drive to Target
+                
+                sleep(25000);
+
              //DetectTarget (); // Detect Target and determine distance
              // check all the trackable target to see which one (if any) is visible.
             

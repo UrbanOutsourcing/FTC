@@ -32,6 +32,11 @@ package org.firstinspires.ftc.teamcode.ATOM;
 //import org.firstinspires.ftc.teamcode.ATOM.*;
 
 import com.qualcomm.robotcore.util.Hardware;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -61,39 +66,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
+
 @Autonomous(name="ATOMAutonomous Java", group="Linear Opmode")
 
 public class ATOMAutonomous extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    //private DcMotor LeftDriveRear = null;
-    //private DcMotor RightDriveRear = null;
-      private  double leftDistance = 0; 
-      private  double rightDistance =0;
+    
+      private  double leftDistance  = 30;  // Hardcoded Distance when not using Vuforia
+      private  double rightDistance = 30;
       private List<VuforiaTrackable> allTrackables;
       private ATOMHardware robot   = new ATOMHardware();
-      private ATOMDriveTrain DriveTrain;
+      private  ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot); ;
       private String target = null;
       private float rotationAngle = 45;
       
       //Location Variables
       private double distanceToDepot = 48;
-      private double distanceToCrater = -2.5 * distanceToDepot;
-
-
+      private double distanceToCrater = -110;
+      private BNO055IMU imu;
+      private BNO055IMU.Parameters imuParameters;
+      private Orientation angles;
+      private Acceleration gravity;
+      
     private static final String VUFORIA_KEY = "AU63SW3/////AAABmUFRPq/ohU8CpLVdaXLTNlg+DNBh3enzFq8SxmRlvTxY6QYiRY2ich0trSJ1UKpoAspqzCjBBiFPERZ5yhrSU8nLyN+mWAB8AU/oKCMl4IyVVqGcYVM4wu/fWzDp8ox/IiX5RzfvhvH0F0KpS3y9VGYIDwOactEIJEMzJYKmAAvGIJCME1YqYAIeoFr38DDpEkqf7gTA8qxQI8Y/AsUOD+v85DHAoGvQbj2JYneG7dZFWQNTk4TtQXW0WAO6bk5cBM9sS3PwokzGQ/N8GsWzGEe6MnpHB589KgY6b97xIhGV6ji1Dhkw+Jj5pg/FrmGOieaCxmiVTNcBIctv6hCJrN6jQOa13CbKkSDwKDTU1qli";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
@@ -117,9 +113,7 @@ public class ATOMAutonomous extends LinearOpMode {
     @Override
     public void runOpMode() {
         
-          //  double leftDistance = 0; 
-          //  double rightDistance =0;
-        
+          
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
          * We can pass Vuforia the handle to a camera preview resource (on the RC phone);
@@ -247,7 +241,7 @@ public class ATOMAutonomous extends LinearOpMode {
 
         final int CAMERA_FORWARD_DISPLACEMENT  = 75;   // eg: Camera is 110 mm in front of robot center
         final int CAMERA_VERTICAL_DISPLACEMENT = 100;   // eg: Camera is 200 mm above ground
-        final int CAMERA_LEFT_DISPLACEMENT     = 150;     // eg: Camera is ON the robot's center line
+        final int CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
 
         OpenGLMatrix phoneLocationOnRobot = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
@@ -260,14 +254,11 @@ public class ATOMAutonomous extends LinearOpMode {
             ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
         }
         
-        
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         InitializeRobot();
-        runtime.reset();
-
-
+        
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
@@ -281,16 +272,19 @@ public class ATOMAutonomous extends LinearOpMode {
              
              sleep(1000);
              
-             ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
              
+             //LowerRobot();
              //DetectTarget (); // Detect Target and determine distance
-             // check all the trackable target to see which one (if any) is visible.
+             
+             
+             
+            // check all the trackable target to see which one (if any) is visible.
+            
             
             targetVisible = false;
             for (VuforiaTrackable trackable : allTrackables) {
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
-                    target = trackable.getName();
                     targetVisible = true;
 
                     // getUpdatedRobotLocation() will return null if no new information is available since
@@ -308,49 +302,76 @@ public class ATOMAutonomous extends LinearOpMode {
                 // express position (translation) of robot in inches.
                 VectorF translation = lastLocation.getTranslation();
                 
-                leftDistance =  Math.abs((translation.get(1) / mmPerInch) + 5);
-                rightDistance = Math.abs((translation.get(1) / mmPerInch) + 5);
-                  
-               telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
+                 leftDistance =  translation.get(1) / mmPerInch;
+                 rightDistance =  translation.get(1) / mmPerInch; 
+                
+                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
                         translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
 
                 // express the rotation of the robot in degrees.
                 Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                
-                rotationAngle = rotation.thirdAngle;
                 telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
             }
             else {
                 telemetry.addData("Visible Target", "none");
             }
             telemetry.update();
-             sleep(2000);
+            
+            //GetPosition();
+            sleep(2000);
              
             // Setup a variable for each drive wheel to save power level for telemetry
             double leftPower;
             double rightPower;
             
-             leftPower  = 0.3;
+             leftPower  = 0.5;
              rightPower = 0.3 ;
              
-             telemetry.addData("Calling", "DriveTrain");
+             telemetry.addData("Drive to Target","");
              telemetry.update();
+             GetPosition();
              
-            DriveTrain.EDrive(.2,0,0,0,(double) rotationAngle); // Turn 45 degrees to align with image
+            DriveTrain.EDrive(.2,0,0,0,GetPosition()); // Turn 45 degrees to align with image
              
              
              DriveTrain.EDrive(leftPower,leftDistance,rightDistance,0,0); // Drive to Target
-             sleep(2000);
-             DriveTrain.EDrive(leftPower,0,0,0,90); // Right Turn
              sleep(1000);
+             telemetry.addData("Right Turn","");
+             telemetry.update();
+             GetPosition();
              
+             DriveTrain.EDrive(leftPower,0,0,0,-90); // Right Turn
+             robot.liftArm.setPosition(0);
+             
+             telemetry.addData("Drive to Depot","");
+             telemetry.update();
+             GetPosition();
              
              DriveTrain.EDrive(leftPower,distanceToDepot,distanceToDepot,0,0); // Drive to Depot
-             // Place code here to drop Marker
              
-             //Set distance to Reverse to 
              
-             DriveTrain.EDrive(leftPower,distanceToCrater,distanceToCrater,0,0); // Drive to Target
+             // Drop Marker
+             
+             telemetry.addData("Drop Marker","");
+             telemetry.update();
+             GetPosition();
+             
+             robot.pivot.setPosition(.5);
+             robot.pivot.setPosition(0);              //Pivot Arm Initial Position
+             sleep(500);
+             robot.pivot.setPosition(.5);
+             robot.leftClaw.setPosition(0);
+             sleep(500);
+             robot.leftClaw.setPosition(1);
+            
+             
+             //Reverse to Crater
+             
+             telemetry.addData("Reverse to Crater","");
+             telemetry.update();
+             GetPosition();
+             
+             DriveTrain.EDrive(leftPower,distanceToCrater,distanceToCrater,0,0); 
             
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -368,9 +389,59 @@ public class ATOMAutonomous extends LinearOpMode {
     
      public void InitializeRobot() {
         
+        //Initialize Robot Hardware
         robot.init(hardwareMap);
-        ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot) ;
-         }
+        robot.liftArm.setPosition(.5);
+        robot.pivot.setPosition(.5);
+        //Initialize IMU
+        
+        imu = hardwareMap.get(BNO055IMU.class, "imu");  
+       // Create new IMU Parameters object.
+        imuParameters = new BNO055IMU.Parameters();
+       // Use degrees as angle unit.
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+       // Express acceleration as m/s^2.
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+       // Disable logging.
+        imuParameters.loggingEnabled = false;
+       // Initialize IMU.
+        imu.initialize(imuParameters);
+        
+     }
+     
+     public void LowerRobot() {
+        
+        sleep(1000);
+        robot.leftClaw.setPosition(1);
+        robot.liftArm.setPosition(1);
+        sleep(7200);
+             
+        robot.liftArm.setPosition(.5);
+        robot.pivot.setPosition(0);
+        robot.pivot.setPosition(1); 
+             
+        DriveTrain.EDrive(.2,0,0,0,-45); // unlatch from hook
+       
+     }
+     
+     public double GetPosition() {
+        
+        // Get absolute orientation
+      // Get acceleration due to force of gravity.
+      angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+      gravity = imu.getGravity();
+      // Display orientation info.
+      telemetry.addData("rot about Z", angles.firstAngle);
+      telemetry.addData("rot about Y", angles.secondAngle);
+      telemetry.addData("rot about X", angles.thirdAngle);
+      // Display gravitational acceleration.
+      telemetry.addData("gravity (Z)", gravity.zAccel);
+      telemetry.addData("gravity (Y)", gravity.yAccel);
+      telemetry.addData("gravity (X)", gravity.xAccel);
+      telemetry.update();
+      return  angles.firstAngle;
+     }
+     
      
      public void DetectTarget () {
       

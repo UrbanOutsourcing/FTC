@@ -86,7 +86,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 
 @Autonomous(name="ATOMAutonomousTensor Java", group="Linear Opmode")
 
-public class ATOMAutonomousTensor extends LinearOpMode {
+public class ATOMAutonomousMineral extends LinearOpMode {
 
     // Declare OpMode members.
       private ElapsedTime runtime = new ElapsedTime();
@@ -290,7 +290,7 @@ public class ATOMAutonomousTensor extends LinearOpMode {
         
 
         InitializeRobot();
-        
+        InitializeTensorFlow();
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
@@ -325,7 +325,7 @@ public class ATOMAutonomousTensor extends LinearOpMode {
         while (opModeIsActive()) {
              
              sleep(1000);
-             
+             DetectMineral ();
              //LowerRobot();
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
              DetectMineral();
@@ -495,6 +495,9 @@ public class ATOMAutonomousTensor extends LinearOpMode {
      
      
      public void DetectMineral () {
+      
+      telemetry.addData("Detecting Mineral", "");
+      telemetry.update();
       if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.

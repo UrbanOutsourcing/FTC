@@ -32,44 +32,42 @@ package org.firstinspires.ftc.teamcode.ATOM;
 //import org.firstinspires.ftc.teamcode.ATOM.*;
 
 import com.qualcomm.robotcore.util.Hardware;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import java.util.Locale;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -77,14 +75,9 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-
-
-
-
-@Autonomous(name="ATOMAutonomousTensor Java", group="Linear Opmode")
+@Autonomous(name="ATOMAutonomousMineral Java", group="Linear Opmode")
 
 public class ATOMAutonomousMineral extends LinearOpMode {
 
@@ -161,11 +154,10 @@ public class ATOMAutonomousMineral extends LinearOpMode {
         
       
         //Instantiate the Vuforia engine
-        //vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        //this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         //vuforia = ClassFactory.getInstance().createVuforia(parameters);
        
-        
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
         VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
@@ -286,49 +278,48 @@ public class ATOMAutonomousMineral extends LinearOpMode {
             ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
         }
         
-        telemetry.addData("Status", "Initialized");
         
-
         InitializeRobot();
-        InitializeTensorFlow();
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+        sleep(3000);
+       
+        
+        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
+        // first.
+        //initVuforia();
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
+
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
-        
-        /** Color Sensor Code */
-        
-             // get a reference to the color sensor.
-        sensorColor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
+        waitForStart();
 
-        // get a reference to the distance sensor that shares the same name.
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F, 0F, 0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
-        // sometimes it helps to multiply the raw RGB values with a scale factor
-        // to amplify/attentuate the measured values.
-        final double SCALE_FACTOR = 255;
-
-        
-
-        // wait for the start button to be pressed.
-           waitForStart();
-
+        if (opModeIsActive()) {
+            /** Activate Tensor Flow Object Detection. */
+            if (tfod != null) {
+                tfod.activate();
+            }
+        }
         /** Start tracking the data sets we care about. */
-        targetsRoverRuckus.activate();
+        //targetsRoverRuckus.activate();
         
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
              
              sleep(1000);
-             DetectMineral ();
+             String goldPosition;
+             
              //LowerRobot();
+             
+             goldPosition = DetectMineral();
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
-             DetectMineral();
+             
              
              DriveTrain.EDrive(-drivePower,distanceToMineral,distanceToMineral,0,0); // Reverse from Mineral 
              sleep(2000);
@@ -383,7 +374,9 @@ public class ATOMAutonomousMineral extends LinearOpMode {
             break;
             
         }
-        
+        if (tfod != null) {
+            tfod.shutdown();
+        }
           
     }
     
@@ -494,10 +487,12 @@ public class ATOMAutonomousMineral extends LinearOpMode {
      }
      
      
-     public void DetectMineral () {
+     public String DetectMineral () {
       
       telemetry.addData("Detecting Mineral", "");
       telemetry.update();
+      
+      String GoldPosition= "None";
       if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -511,6 +506,7 @@ public class ATOMAutonomousMineral extends LinearOpMode {
                         for (Recognition recognition : updatedRecognitions) {
                           if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                             goldMineralX = (int) recognition.getLeft();
+                            telemetry.addData("Gold Mineral Detected","");
                           } else if (silverMineral1X == -1) {
                             silverMineral1X = (int) recognition.getLeft();
                           } else {
@@ -520,16 +516,20 @@ public class ATOMAutonomousMineral extends LinearOpMode {
                         if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
                           if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Left");
+                            GoldPosition = "Left";
                           } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
                             telemetry.addData("Gold Mineral Position", "Right");
+                            GoldPosition = "Right";
                           } else {
                             telemetry.addData("Gold Mineral Position", "Center");
+                            GoldPosition = "Center";
                           }
                         }
                       }
                       telemetry.update();
                     }
                 }
+                return GoldPosition;
      }
 
         

@@ -32,43 +32,42 @@ package org.firstinspires.ftc.teamcode.ATOM;
 //import org.firstinspires.ftc.teamcode.ATOM.*;
 
 import com.qualcomm.robotcore.util.Hardware;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.Range;
+
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import java.util.Locale;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
+
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -76,22 +75,20 @@ import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Locale;
 
 @Autonomous(name="ATOMAutonomousRight Java", group="Linear Opmode")
 
 public class ATOMAutonomousRight extends LinearOpMode {
 
     // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
+      private ElapsedTime runtime = new ElapsedTime();
     
       private  double leftDistance  = 30;  // Hardcoded Distance when not using Vuforia
       private  double rightDistance = 30;
-      private List<VuforiaTrackable> allTrackables;
+     
       private ATOMHardware robot   = new ATOMHardware();
       private  ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot); ;
-      private String target = null;
-      private float rotationAngle = 45;
       private double drivePower = .3;
       
       private ColorSensor sensorColor;
@@ -101,31 +98,47 @@ public class ATOMAutonomousRight extends LinearOpMode {
       private double distanceToDepot = 48;
       private double distanceToCrater = -110;
       private double distanceToMineral = 18;
+      private double distanceToTarget = 36;
+      private double degreesToTarget = -45;
+      private double degreesToDepot = -90;
+      private String goldPosition = "None";
+      
       private BNO055IMU imu;
       private BNO055IMU.Parameters imuParameters;
       private Orientation angles;
       private Acceleration gravity;
       
-    private static final String VUFORIA_KEY = "AU63SW3/////AAABmUFRPq/ohU8CpLVdaXLTNlg+DNBh3enzFq8SxmRlvTxY6QYiRY2ich0trSJ1UKpoAspqzCjBBiFPERZ5yhrSU8nLyN+mWAB8AU/oKCMl4IyVVqGcYVM4wu/fWzDp8ox/IiX5RzfvhvH0F0KpS3y9VGYIDwOactEIJEMzJYKmAAvGIJCME1YqYAIeoFr38DDpEkqf7gTA8qxQI8Y/AsUOD+v85DHAoGvQbj2JYneG7dZFWQNTk4TtQXW0WAO6bk5cBM9sS3PwokzGQ/N8GsWzGEe6MnpHB589KgY6b97xIhGV6ji1Dhkw+Jj5pg/FrmGOieaCxmiVTNcBIctv6hCJrN6jQOa13CbKkSDwKDTU1qli";
+      private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+      private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
+      private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
+      
+      private List<VuforiaTrackable> allTrackables;
+      private static final String VUFORIA_KEY = "AU63SW3/////AAABmUFRPq/ohU8CpLVdaXLTNlg+DNBh3enzFq8SxmRlvTxY6QYiRY2ich0trSJ1UKpoAspqzCjBBiFPERZ5yhrSU8nLyN+mWAB8AU/oKCMl4IyVVqGcYVM4wu/fWzDp8ox/IiX5RzfvhvH0F0KpS3y9VGYIDwOactEIJEMzJYKmAAvGIJCME1YqYAIeoFr38DDpEkqf7gTA8qxQI8Y/AsUOD+v85DHAoGvQbj2JYneG7dZFWQNTk4TtQXW0WAO6bk5cBM9sS3PwokzGQ/N8GsWzGEe6MnpHB589KgY6b97xIhGV6ji1Dhkw+Jj5pg/FrmGOieaCxmiVTNcBIctv6hCJrN6jQOa13CbKkSDwKDTU1qli";
 
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
-    private static final float mmPerInch        = 25.4f;
-    private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
-    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
+      private static final float mmPerInch        = 25.4f;
+      private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
+      private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
 
     // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
     // Valid choices are:  BACK or FRONT
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+      private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
 
-    private OpenGLMatrix lastLocation = null;
-    private boolean targetVisible = false;
+      private OpenGLMatrix lastLocation = null;
+      private boolean targetVisible = false;
     /**
      * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
      * localization engine.
      */
     VuforiaLocalizer vuforia;
 
+    /**
+     * {@link #tfod} is the variable we will use to store our instance of the Tensor Flow Object
+     * Detection engine.
+     */
+     
+      private TFObjectDetector tfod;
     @Override
     public void runOpMode() {
         
@@ -145,11 +158,10 @@ public class ATOMAutonomousRight extends LinearOpMode {
         
       
         //Instantiate the Vuforia engine
-        //vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        //this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
         //vuforia = ClassFactory.getInstance().createVuforia(parameters);
        
-        
         // Load the data sets that for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
         VuforiaTrackables targetsRoverRuckus = this.vuforia.loadTrackablesFromAsset("RoverRuckus");
@@ -270,98 +282,111 @@ public class ATOMAutonomousRight extends LinearOpMode {
             ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
         }
         
+        
+        InitializeRobot();
         telemetry.addData("Status", "Initialized");
         
+        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
+        // first.
+        //initVuforia();
 
-        InitializeRobot();
         
+
         /** Wait for the game to begin */
         telemetry.addData(">", "Press Play to start tracking");
         telemetry.update();
-        
-        /** Color Sensor Code */
-        
-             // get a reference to the color sensor.
-        sensorColor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
+        waitForStart();
 
-        // get a reference to the distance sensor that shares the same name.
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
-
-        // hsvValues is an array that will hold the hue, saturation, and value information.
-        float hsvValues[] = {0F, 0F, 0F};
-
-        // values is a reference to the hsvValues array.
-        final float values[] = hsvValues;
-
-        // sometimes it helps to multiply the raw RGB values with a scale factor
-        // to amplify/attentuate the measured values.
-        final double SCALE_FACTOR = 255;
-
-        
-
-        // wait for the start button to be pressed.
-           waitForStart();
-
+        if (opModeIsActive()) {
+            /** Activate Tensor Flow Object Detection. */
+            if (tfod != null) {
+                tfod.activate();
+            }
+        }
         /** Start tracking the data sets we care about. */
-        targetsRoverRuckus.activate();
+        //targetsRoverRuckus.activate();
         
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
              
-             sleep(1000);
+            sleep(1000);
              
-             //LowerRobot();
-             DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
-
-        // Sample Mineral
-        // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
-       
-            // convert the RGB values to HSV values.
-            // multiply by the SCALE_FACTOR.
-            // then cast it back to int (SCALE_FACTOR is a double)
-            Color.RGBToHSV((int) (sensorColor.red() * SCALE_FACTOR),
-                    (int) (sensorColor.green() * SCALE_FACTOR),
-                    (int) (sensorColor.blue() * SCALE_FACTOR),
-                    hsvValues);
-
-            // send the info back to driver station using telemetry function.
-            telemetry.addData("Distance (cm)",
-                    String.format(Locale.US, "%.02f", sensorDistance.getDistance(DistanceUnit.CM)));
-            telemetry.addData("Alpha", sensorColor.alpha());
-            telemetry.addData("Red  ", sensorColor.red());
-            telemetry.addData("Green", sensorColor.green());
-            telemetry.addData("Blue ", sensorColor.blue());
-            telemetry.addData("Hue", hsvValues[0]);
+            //LowerRobot(); //Lower Robot
+             
+            TouchMineral();  //Touch Mineral
+            DriveToDepot();  //Drive to Depot
+            DropMarker();    // Drop Marker and Park in Crater
+             
+            drivePower  = 0;
+            break;
             
-            if ((hsvValues[0] > 30) || (hsvValues[0] < 55)) {
-             telemetry.addData("Mineral Found ", "");
-            telemetry.addData("Hue", hsvValues[0]);   
-            }
-            
-             DriveTrain.EDrive(-drivePower,distanceToMineral,distanceToMineral,0,0); // Reverse from Mineral 
-             sleep(2000);
+        }
+        if (tfod != null) {
+            tfod.shutdown();
+        }
+          
+    }
+    
+     public void InitializeRobot() {
+        
+        //Initialize Robot Hardware
+        robot.init(hardwareMap);
+        robot.liftArm.setPosition(.5);
+        robot.pivot.setPosition(.5);
+        
+        
+        //Initialize IMU
+        imu = hardwareMap.get(BNO055IMU.class, "imu");  
+       // Create new IMU Parameters object.
+        imuParameters = new BNO055IMU.Parameters();
+       // Use degrees as angle unit.
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+       // Express acceleration as m/s^2.
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+       // Disable logging.
+        imuParameters.loggingEnabled = false;
+       // Initialize IMU.
+        imu.initialize(imuParameters);
+        
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+            telemetry.update();
+        }
+     }
+     
+     public void LowerRobot() {
+        
+        robot.leftClaw.setPosition(1);
+        robot.liftArm.setPosition(1);
+        sleep(7200);
              
-             DriveTrain.EDrive(drivePower,0,0,0,-45); // Turn 45 degrees to align with image
+        robot.liftArm.setPosition(.5);
+        robot.pivot.setPosition(0);
+        robot.pivot.setPosition(1); 
              
-             telemetry.addData("Drive to Target","");
-             telemetry.update();
-             
-             DriveTrain.EDrive(drivePower,leftDistance,rightDistance,0,0); // Drive to Target
-             
-             telemetry.addData("Right Turn","");
-             telemetry.update();
-             
-              sleep(2000);
-             
-             DriveTrain.EDrive(drivePower,0,0,0,-90); // Right Turn
-             robot.liftArm.setPosition(0);
+        DriveTrain.EDrive(drivePower,0,0,0,-45); // unlatch from hook
+        DriveTrain.EDrive(drivePower,2,2,0,0); // Inch forward
+        DriveTrain.EDrive(drivePower,0,0,0,45); // Face Minerals
+     }
+     
+     public void DriveToDepot() {
              
              telemetry.addData("Drive to Depot","");
              telemetry.update();
              
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
+             DriveTrain.EDrive(drivePower,distanceToTarget,distanceToTarget,0,0); // Drive to Target
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToDepot); // Right Turn
+             robot.liftArm.setPosition(0);
              DriveTrain.EDrive(drivePower,distanceToDepot,distanceToDepot,0,0); // Drive to Depot
-             
-             // Drop Marker
+        
+     }
+     
+     public void DropMarker() {
+         
+      // Drop Marker
              
              telemetry.addData("Drop Marker","");
              telemetry.update();
@@ -380,59 +405,64 @@ public class ATOMAutonomousRight extends LinearOpMode {
              telemetry.addData("Reverse to Crater","");
              telemetry.update();
              
-             DriveTrain.EDrive(drivePower,distanceToCrater,distanceToCrater,0,0); 
-            
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "TargetPosition (%.2f), Power (%.2f)", (double) robot.LeftDriveRear.getTargetPosition(), drivePower);
-            telemetry.update();
-            sleep(2000);
-            drivePower  = 0;
-            break;
-            
-        }
+             DriveTrain.EDrive(drivePower,distanceToCrater,distanceToCrater,0,0);    
+             
+     }
+     public void TouchMineral() {
         
-          
+             goldPosition = DetectMineral();
+             switch(goldPosition) {
+             
+             case "Center":
+             DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
+             DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
+             break;
+             case "Left":
+             DriveTrain.EDrive(drivePower,0,0,0,-45); // Turn to Mineral 
+             DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
+             DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
+             DriveTrain.EDrive(drivePower,0,0,0,45); // Face Minerals 
+             break;
+             case "Right":
+             DriveTrain.EDrive(drivePower,0,0,0,45); // Turn to Right Mineral 
+             DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral  
+             DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
+             DriveTrain.EDrive(drivePower,0,0,0,-45); // Face Minerals
+             break;
+             default:
+                 
+             }
+              
+             telemetry.addData("Gold Position",goldPosition);
+             telemetry.update();
+     }
+     
+     
+     private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraDirection = CameraDirection.BACK;
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the Tensor Flow Object Detection engine.
     }
-    
-     public void InitializeRobot() {
-        
-        //Initialize Robot Hardware
-        robot.init(hardwareMap);
-        robot.liftArm.setPosition(.5);
-        robot.pivot.setPosition(.5);
-        //Initialize IMU
-        
-        imu = hardwareMap.get(BNO055IMU.class, "imu");  
-       // Create new IMU Parameters object.
-        imuParameters = new BNO055IMU.Parameters();
-       // Use degrees as angle unit.
-        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-       // Express acceleration as m/s^2.
-        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-       // Disable logging.
-        imuParameters.loggingEnabled = false;
-       // Initialize IMU.
-        imu.initialize(imuParameters);
-        
-     }
-     
-     public void LowerRobot() {
-        
-        sleep(1000);
-        robot.leftClaw.setPosition(1);
-        robot.liftArm.setPosition(1);
-        sleep(7200);
-             
-        robot.liftArm.setPosition(.5);
-        robot.pivot.setPosition(0);
-        robot.pivot.setPosition(1); 
-             
-        DriveTrain.EDrive(drivePower,0,0,0,-45); // unlatch from hook
-        DriveTrain.EDrive(drivePower,2,2,0,0); // Inch forward
-        DriveTrain.EDrive(drivePower,0,0,0,45); // Face Minerals
-     }
-     
+
+    /**
+     * Initialize the Tensor Flow Object Detection engine.
+     */
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+            "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+    }
      public double GetPosition() {
         
         // Get absolute orientation
@@ -452,46 +482,50 @@ public class ATOMAutonomousRight extends LinearOpMode {
      }
      
      
-     public void DetectTarget () {
+     public String DetectMineral () {
       
-       // check all the trackable target to see which one (if any) is visible.
-            targetVisible = false;
-            for (VuforiaTrackable trackable : allTrackables) {
-                if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
-                    telemetry.addData("Visible Target", trackable.getName());
-                    targetVisible = true;
-
-                    // getUpdatedRobotLocation() will return null if no new information is available since
-                    // the last time that call was made, or if the trackable is not currently visible.
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
+      telemetry.addData("Detecting Mineral", "");
+      telemetry.update();
+      
+      String GoldPosition= "None";
+      if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                      telemetry.addData("# Object Detected", updatedRecognitions.size());
+                      if (updatedRecognitions.size() == 3) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                          if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                            goldMineralX = (int) recognition.getLeft();
+                            telemetry.addData("Gold Mineral Detected","");
+                          } else if (silverMineral1X == -1) {
+                            silverMineral1X = (int) recognition.getLeft();
+                          } else {
+                            silverMineral2X = (int) recognition.getLeft();
+                          }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                          if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                            telemetry.addData("Gold Mineral Position", "Left");
+                            GoldPosition = "Left";
+                          } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            GoldPosition = "Right";
+                          } else {
+                            telemetry.addData("Gold Mineral Position", "Center");
+                            GoldPosition = "Center";
+                          }
+                        }
+                      }
+                      telemetry.update();
                     }
-                    break;
                 }
-            }
+                return GoldPosition;
+     }
 
-            // Provide feedback as to where the robot is located (if we know).
-            if (targetVisible) {
-                // express position (translation) of robot in inches.
-                VectorF translation = lastLocation.getTranslation();
-                
-                 leftDistance =  translation.get(1) / mmPerInch;
-                 rightDistance =  translation.get(1) / mmPerInch; 
-                
-                telemetry.addData("Pos (in)", "{X, Y, Z} = %.1f, %.1f, %.1f",
-                        translation.get(0) / mmPerInch, translation.get(1) / mmPerInch, translation.get(2) / mmPerInch);
-
-                // express the rotation of the robot in degrees.
-                Orientation rotation = Orientation.getOrientation(lastLocation, EXTRINSIC, XYZ, DEGREES);
-                telemetry.addData("Rot (deg)", "{Roll, Pitch, Heading} = %.0f, %.0f, %.0f", rotation.firstAngle, rotation.secondAngle, rotation.thirdAngle);
-            }
-            else {
-                telemetry.addData("Visible Target", "none");
-            }
-            telemetry.update();
-     
-           
-     }         
-           
+        
 }

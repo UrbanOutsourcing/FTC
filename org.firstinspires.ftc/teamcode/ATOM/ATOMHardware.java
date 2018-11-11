@@ -22,6 +22,17 @@
 package org.firstinspires.ftc.teamcode.ATOM;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -40,6 +51,12 @@ public class ATOMHardware
     public Servo    rightClaw   = null;
     public Servo    pivot       = null;
     public Servo    liftArm     = null;
+    
+    public BNO055IMU imu;
+    public BNO055IMU.Parameters imuParameters;
+    public Orientation angles;
+    public Acceleration gravity;
+    
     
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -116,6 +133,27 @@ public class ATOMHardware
         rightClaw.setPosition(MID_SERVO);
         pivot.setPosition(.5);
         liftArm.setPosition(.5);
+        
+        //Initialize IMU
+        imu = hwMap.get(BNO055IMU.class, "imu");  
+       // Create new IMU Parameters object.
+        imuParameters = new BNO055IMU.Parameters();
+       // Use degrees as angle unit.
+        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+       // Express acceleration as m/s^2.
+        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+       // Disable logging.
+        imuParameters.loggingEnabled = false;
+       // Initialize IMU.
+        imu.initialize(imuParameters);
     }
+    public double GetPosition() {
+        
+      // Get absolute orientation
+      // Get acceleration due to force of gravity.
+      angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+      gravity = imu.getGravity();
+      return  angles.firstAngle;
+     }
  }
 

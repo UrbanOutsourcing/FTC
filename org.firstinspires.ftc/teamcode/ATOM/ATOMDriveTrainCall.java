@@ -91,13 +91,15 @@ public class ATOMDriveTrainCall extends LinearOpMode {
              telemetry.update();
              ATOMDriveTrain ATOMDriveTrain = new ATOMDriveTrain(robot) ;
              //DriveTrain.PDrive(leftPower,rightPower,5.0); // Move Forward for 5 Seconds
-             ATOMDriveTrain.EDrive(leftPower,16,16,0,0); // Move Forward for N  Inches or N Degrees
-             ATOMDriveTrain.EDrive(leftPower,0,0,0,90); // Move Forward for N  Inches or N Degrees
-             ATOMDriveTrain.EDrive(leftPower,18,18,0,0); // Move Forward for N  Inches or N Degrees
+             //ATOMDriveTrain.EDrive(leftPower,16,16,0,0); // Move Forward for N  Inches or N Degrees
+             ATOMDriveTrain.EDrive(leftPower,0,0,0,-45); // Move Forward for N  Inches or N Degrees
+             //ATOMDriveTrain.EDrive(leftPower,18,18,0,0); // Move Forward for N  Inches or N Degrees
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+            telemetry.addData("Angle", "Z (%.2f)",robot.GetPosition());
             telemetry.update();
+            sleep(2000);
             break;
         }
         

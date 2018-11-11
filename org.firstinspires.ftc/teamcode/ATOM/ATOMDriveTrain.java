@@ -29,7 +29,7 @@ public class ATOMDriveTrain {
     //private DcMotor LeftDriveRear = null;
     //private DcMotor RightDriveRear = null;
     private ATOMHardware robot   = null;   // Use ATOM and EVE hardware
- 
+    private double robotPosition;
  
     public ATOMDriveTrain(ATOMHardware pRobot){
             robot = pRobot;
@@ -64,8 +64,8 @@ public class ATOMDriveTrain {
             //runtime.reset();
             InitializeEncoders(leftInches, rightInches,degrees); 
             
-            if(degrees >0){ 
-                pSpeed = .2; //Set turning speed
+            if(Math.abs(degrees)>0){ 
+                pSpeed = .3; //Set turning speed
             }  
             
             robot.LeftDriveRear.setPower(Math.abs(pSpeed));
@@ -73,12 +73,14 @@ public class ATOMDriveTrain {
             robot.LeftDriveFront.setPower(Math.abs(pSpeed));
             robot.RightDriveFront.setPower(Math.abs(pSpeed));
            
+            
                
-             while (robot.LeftDriveRear.isBusy() & robot.RightDriveRear.isBusy()) {
+            while (robot.LeftDriveRear.isBusy() & robot.RightDriveRear.isBusy() & robot.LeftDriveFront.isBusy() & robot.RightDriveFront.isBusy()) {
 
                 // Loop until the robot reaches the designated distance
-                
-            }  
+             } 
+            
+             
                // Set Power to Zero
             robot.LeftDriveRear.setPower(0);
             robot.RightDriveRear.setPower(0);
@@ -111,6 +113,8 @@ public class ATOMDriveTrain {
              
             int newLeftTarget;
             int newRightTarget;
+            int newLeftTargetFront;
+            int newRightTargetFront;
             double targetInches;
             
             if(degrees == 0) {
@@ -130,26 +134,26 @@ public class ATOMDriveTrain {
               robot.RightDriveFront.setTargetPosition(newRightTarget);
             }
               else {
-                  targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (Math.abs(degrees)/(int) 45)) - 2; 
+                  targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (Math.abs(degrees)/(int) 45))-1.5; 
                  if(degrees > 0) { 
               // Determine new target position, and pass to motor controller
               
                   newLeftTarget = robot.LeftDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
                   newRightTarget = robot.RightDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
-                  newLeftTarget = robot.LeftDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
-                  newRightTarget = robot.RightDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+                  newLeftTargetFront = robot.LeftDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+                  newRightTargetFront = robot.RightDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
               }
                 else {
                  newLeftTarget = robot.LeftDriveRear.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
                  newRightTarget = robot.RightDriveRear.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
-                 newLeftTarget = robot.LeftDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
-                 newRightTarget = robot.RightDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
+                 newLeftTargetFront = robot.LeftDriveFront.getCurrentPosition() - (int)(targetInches * robot.COUNTS_PER_INCH);
+                 newRightTargetFront = robot.RightDriveFront.getCurrentPosition() + (int)(targetInches * robot.COUNTS_PER_INCH);
               }
              
              robot.LeftDriveFront.setTargetPosition(newLeftTarget);
              robot.RightDriveFront.setTargetPosition(newRightTarget);
-             robot.LeftDriveRear.setTargetPosition(newLeftTarget);
-             robot.RightDriveRear.setTargetPosition(newRightTarget);
+             robot.LeftDriveRear.setTargetPosition(newLeftTargetFront);
+             robot.RightDriveRear.setTargetPosition(newRightTargetFront);
               
               
              

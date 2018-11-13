@@ -86,21 +86,24 @@ public class ATOMAutonomousRight extends LinearOpMode {
     
       private  double leftDistance  = 30;  // Hardcoded Distance when not using Vuforia
       private  double rightDistance = 30;
-     
-      private ATOMHardware robot   = new ATOMHardware();
-      private  ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot); ;
-      private double drivePower = .3;
+      private double drivePower = .5;      //Default Motor Power
+      
+      
+      private ATOMHardware robot   = new ATOMHardware(); //Create Robot Instance
+      private ATOMDriveTrain DriveTrain = new ATOMDriveTrain(robot); //Create DriveTrain Instance passing Robot
+      
       
       private ColorSensor sensorColor;
       private DistanceSensor sensorDistance;
       
-      //Location Variables
+      //Location Variables in Inches and Degrees
       private double distanceToDepot = 48;
       private double distanceToCrater = -110;
       private double distanceToMineral = 18;
-      private double distanceToTarget = 36;
+      private double distanceToTarget = 48;
       private double degreesToTarget = -45;
       private double degreesToDepot = -90;
+      private double degreesToMineral = 30;
       private String goldPosition = "None";
       
       private BNO055IMU imu;
@@ -312,10 +315,9 @@ public class ATOMAutonomousRight extends LinearOpMode {
             sleep(1000);
              
             //LowerRobot(); //Lower Robot
-             
-            TouchMineral();  //Touch Mineral
+            TouchMineral();  //Detect and Touch Mineral
             DriveToDepot();  //Drive to Depot
-            DropMarker();    // Drop Marker and Park in Crater
+            DropMarker();    //Drop Marker and Park in Crater
              
             drivePower  = 0;
             break;
@@ -348,6 +350,7 @@ public class ATOMAutonomousRight extends LinearOpMode {
        // Initialize IMU.
         imu.initialize(imuParameters);
         
+       //Initialize TensorFlow 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
@@ -358,6 +361,9 @@ public class ATOMAutonomousRight extends LinearOpMode {
      
      public void LowerRobot() {
         
+        telemetry.addData("Lower Robot","");
+        telemetry.update();
+        
         robot.leftClaw.setPosition(1);
         robot.liftArm.setPosition(1);
         sleep(7200);
@@ -366,21 +372,21 @@ public class ATOMAutonomousRight extends LinearOpMode {
         robot.pivot.setPosition(0);
         robot.pivot.setPosition(1); 
              
-        DriveTrain.EDrive(drivePower,0,0,0,-45); // unlatch from hook
-        DriveTrain.EDrive(drivePower,2,2,0,0); // Inch forward
+        DriveTrain.EDrive(drivePower,0,0,0,-45);// unlatch from hook
+        DriveTrain.EDrive(drivePower,2,2,0,0);  // Inch forward
         DriveTrain.EDrive(drivePower,0,0,0,45); // Face Minerals
      }
      
      public void DriveToDepot() {
              
-             telemetry.addData("Drive to Depot","");
-             telemetry.update();
+        telemetry.addData("Drive to Depot","");
+        telemetry.update();
              
-             DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
-             DriveTrain.EDrive(drivePower,distanceToTarget,distanceToTarget,0,0); // Drive to Target
-             DriveTrain.EDrive(drivePower,0,0,0,degreesToDepot); // Right Turn
-             robot.liftArm.setPosition(0);
-             DriveTrain.EDrive(drivePower,distanceToDepot,distanceToDepot,0,0); // Drive to Depot
+        DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
+        DriveTrain.EDrive(drivePower,distanceToTarget,distanceToTarget,0,0); // Drive to Target
+        DriveTrain.EDrive(drivePower,0,0,0,degreesToDepot); // Right Turn
+        //robot.liftArm.setPosition(0);
+        DriveTrain.EDrive(drivePower,distanceToDepot,distanceToDepot,0,0); // Drive to Depot
         
      }
      
@@ -388,24 +394,24 @@ public class ATOMAutonomousRight extends LinearOpMode {
          
       // Drop Marker
              
-             telemetry.addData("Drop Marker","");
-             telemetry.update();
+        telemetry.addData("Drop Marker","");
+        telemetry.update();
              
-             robot.pivot.setPosition(.5);
-             robot.pivot.setPosition(0);              //Pivot Arm Initial Position
-             sleep(500);
-             robot.pivot.setPosition(.5);
-             robot.leftClaw.setPosition(0);
-             sleep(500);
-             robot.leftClaw.setPosition(1);
+        robot.pivot.setPosition(.5);
+        robot.pivot.setPosition(0);              //Pivot Arm Initial Position
+        sleep(500);
+        robot.pivot.setPosition(.5);
+        robot.leftClaw.setPosition(0);
+        sleep(500);
+        robot.leftClaw.setPosition(1);
             
              
-             //Reverse to Crater
+     //Reverse to Crater
              
-             telemetry.addData("Reverse to Crater","");
-             telemetry.update();
+        telemetry.addData("Reverse to Crater","");
+        telemetry.update();
              
-             DriveTrain.EDrive(drivePower,distanceToCrater,distanceToCrater,0,0);    
+        DriveTrain.EDrive(drivePower,distanceToCrater,distanceToCrater,0,0);    
              
      }
      public void TouchMineral() {
@@ -418,16 +424,16 @@ public class ATOMAutonomousRight extends LinearOpMode {
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
              break;
              case "Left":
-             DriveTrain.EDrive(drivePower,0,0,0,-45); // Turn to Mineral 
+             DriveTrain.EDrive(drivePower,0,0,0,-degreesToMineral); // Turn to Mineral 
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
-             DriveTrain.EDrive(drivePower,0,0,0,45); // Face Minerals 
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToMineral); // Face Minerals 
              break;
              case "Right":
-             DriveTrain.EDrive(drivePower,0,0,0,45); // Turn to Right Mineral 
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToMineral); // Turn to Right Mineral 
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral  
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
-             DriveTrain.EDrive(drivePower,0,0,0,-45); // Face Minerals
+             DriveTrain.EDrive(drivePower,0,0,0,-degreesToMineral); // Face Minerals
              break;
              default:
                  
@@ -463,9 +469,10 @@ public class ATOMAutonomousRight extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
+    
      public double GetPosition() {
         
-        // Get absolute orientation
+      // Get absolute orientation
       // Get acceleration due to force of gravity.
       angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
       gravity = imu.getGravity();

@@ -97,12 +97,12 @@ public class EVEAutonomousRight extends LinearOpMode {
       private DistanceSensor sensorDistance;
       
       //Location Variables in Inches and Degrees
-      private double distanceToDepot = 48;
-      private double distanceToCrater = -110;
+      private double distanceToDepot = 44;
+      private double distanceToCrater = -80;
       private double distanceToMineral = 18;
-      private double distanceToTarget = 48;
-      private double degreesToTarget = -45;
-      private double degreesToDepot = -90;
+      private double distanceToTarget = 35;
+      private double degreesToTarget = 22.5;
+      private double degreesToDepot = 40;
       private double degreesToMineral = 30;
       private String goldPosition = "None";
       
@@ -314,7 +314,7 @@ public class EVEAutonomousRight extends LinearOpMode {
              
             sleep(1000);
              
-            LowerRobot(); //Lower Robot
+            //LowerRobot(); //Lower Robot
             TouchMineral();  //Detect and Touch Mineral
             DriveToDepot();  //Drive to Depot
             DropMarker();    //Drop Marker and Park in Crater

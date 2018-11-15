@@ -317,6 +317,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
             sleep(1000);
              
             //LowerRobot(); //Lower Robot
+            initialAngle = robot.GetHeading();
             TouchMineral();  //Detect and Touch Mineral
             DriveToDepot();  //Drive to Depot
             DropMarker();    //Drop Marker and Park in Crater
@@ -369,11 +370,10 @@ public class ATOMAutonomousLeft extends LinearOpMode {
      
      public void DriveToDepot() {
              
+        DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
         telemetry.addData("Drive to Depot","");
         telemetry.addData("Heading", robot.GetHeading() - initialAngle);
         telemetry.update();
-             
-        DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
         DriveTrain.EDrive(drivePower,distanceToTarget,distanceToTarget,0,0); // Drive to Target
         DriveTrain.EDrive(drivePower,0,0,0,degreesToDepot); // Right Turn
         //robot.liftArm.setPosition(0);
@@ -414,6 +414,8 @@ public class ATOMAutonomousLeft extends LinearOpMode {
             telemetry.update();
              
              goldPosition = DetectMineral();
+             
+             
              switch(goldPosition) {
              
              case "Center":

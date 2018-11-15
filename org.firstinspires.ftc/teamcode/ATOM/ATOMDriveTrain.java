@@ -134,7 +134,7 @@ public class ATOMDriveTrain {
               robot.RightDriveFront.setTargetPosition(newRightTarget);
             }
               else {
-                  targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (Math.abs(degrees)/(int) 45))-1.5; 
+                  targetInches = (robot.WHEEL_DIAMETER_INCHES * 3.1415 * (Math.abs(degrees)/(int) 45))-1; 
                  if(degrees > 0) { 
               // Determine new target position, and pass to motor controller
               

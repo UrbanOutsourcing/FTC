@@ -147,7 +147,7 @@ public class ATOMHardware
        // Initialize IMU.
         imu.initialize(imuParameters);
     }
-    public double GetPosition() {
+    public double GetHeading() {
         
       // Get absolute orientation
       // Get acceleration due to force of gravity.

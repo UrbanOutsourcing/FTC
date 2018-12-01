@@ -97,13 +97,14 @@ public class ATOMAutonomousLeft extends LinearOpMode {
       private DistanceSensor sensorDistance;
       
       //Location Variables in Inches and Degrees
-      private double distanceToDepot = 48;
+      private double distanceToDepot = 24;
       private double distanceToCrater = -110;
-      private double distanceToMineral = 30;
-      private double distanceToTarget = 46;
-      private double degreesToTarget = -55;
-      private double degreesToDepot = -95;
-      private double degreesToMineral = 33;
+      private double distanceToMineral = 40;
+      private double distanceToTarget = 43;
+      private double degreesToTarget = 45;
+      private double degreesToDepot = -90;
+      private double degreesToMineral = 30;
+      private double detectAttempts = 10;
       private double initialAngle;
       private String goldPosition = "None";
       
@@ -228,7 +229,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
      
      public void DriveToDepot() {
              
-        DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
+        //DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image
         telemetry.addData("Drive to Depot","");
         telemetry.addData("Heading", robot.GetHeading() - initialAngle);
         telemetry.update();
@@ -262,7 +263,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
         telemetry.addData("Heading", robot.GetHeading() - initialAngle);
         telemetry.update();
              
-        DriveTrain.EDrive(drivePower,distanceToCrater,distanceToCrater,0,0);    
+        DriveTrain.EDrive(drivePower+.25,distanceToCrater,distanceToCrater,0,0);    
              
      }
      public void TouchMineral() {
@@ -284,13 +285,13 @@ public class ATOMAutonomousLeft extends LinearOpMode {
              DriveTrain.EDrive(drivePower,0,0,0,-degreesToMineral); // Turn to Mineral 
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
-             DriveTrain.EDrive(drivePower,0,0,0,degreesToMineral); // Face Minerals 
+             DriveTrain.EDrive(drivePower,0,0,0,(degreesToTarget + degreesToMineral)); // Face Target 
              break;
              case "Right":
              DriveTrain.EDrive(drivePower,0,0,0,degreesToMineral); // Turn to Right Mineral 
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral  
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
-             DriveTrain.EDrive(drivePower,0,0,0,-degreesToMineral); // Face Minerals
+             DriveTrain.EDrive(drivePower,0,0,0,(degreesToTarget + degreesToMineral)); // Face Target
              break;
              default:
                  
@@ -323,6 +324,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
             "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minimumConfidence = 0.25;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
@@ -340,8 +342,9 @@ public class ATOMAutonomousLeft extends LinearOpMode {
             if (tfod != null) {
                 tfod.activate();
             }
-            sleep(2000);
-      if (tfod != null) {
+             double i = 0;
+       while (i < detectAttempts) {     
+         if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
@@ -351,10 +354,11 @@ public class ATOMAutonomousLeft extends LinearOpMode {
                         int goldMineralX = -1;
                         int silverMineral1X = -1;
                         int silverMineral2X = -1;
+                        i = detectAttempts;
                         for (Recognition recognition : updatedRecognitions) {
                           if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                             goldMineralX = (int) recognition.getLeft();
-                            telemetry.addData("Gold Mineral Detected","");
+                            
                           } else if (silverMineral1X == -1) {
                             silverMineral1X = (int) recognition.getLeft();
                           } else {
@@ -375,8 +379,12 @@ public class ATOMAutonomousLeft extends LinearOpMode {
                         }
                       }
                       telemetry.update();
+                      i++;
+                      //sleep(500);
                     }
                 }
+       }
+                
                 return GoldPosition;
      }
 

@@ -22,11 +22,30 @@
 package org.firstinspires.ftc.teamcode.EVE;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 public class EVEHardware
 {
@@ -41,11 +60,17 @@ public class EVEHardware
     public Servo    pivot       = null;
     public DcMotor  liftArm     = null;
     
+    
+    public BNO055IMU imu;
+    public BNO055IMU.Parameters imuParameters;
+    public Orientation angles;
+    public Acceleration gravity;
+    
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
     
-    public  double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: Neverest Motor Encoder
+    public  double     COUNTS_PER_MOTOR_REV    = 1140 ;    // eg: Neverest Motor Encoder
     public  double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
     public  double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     public  double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
@@ -118,5 +143,14 @@ public class EVEHardware
         pivot.setPosition(1);
        
     }
+    public double GetHeading() {
+        
+      // Get absolute orientation
+      // Get acceleration due to force of gravity.
+      angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+      gravity = imu.getGravity();
+      return  angles.firstAngle;
+      
+     }
  }
 

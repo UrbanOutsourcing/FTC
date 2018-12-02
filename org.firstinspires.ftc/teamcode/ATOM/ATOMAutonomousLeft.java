@@ -272,7 +272,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
             telemetry.addData("Heading", robot.GetHeading() - initialAngle);
             telemetry.update();
              
-             goldPosition = DetectMineral();
+             goldPosition = DetectMineral2();
              
              
              switch(goldPosition) {
@@ -280,6 +280,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
              case "Center":
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral 
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Face Target 
              break;
              case "Left":
              DriveTrain.EDrive(drivePower,0,0,0,-degreesToMineral); // Turn to Mineral 
@@ -291,10 +292,10 @@ public class ATOMAutonomousLeft extends LinearOpMode {
              DriveTrain.EDrive(drivePower,0,0,0,degreesToMineral); // Turn to Right Mineral 
              DriveTrain.EDrive(drivePower,distanceToMineral,distanceToMineral,0,0); // Drive to Mineral  
              DriveTrain.EDrive(drivePower,-distanceToMineral,-distanceToMineral,0,0); // Reverse from Mineral 
-             DriveTrain.EDrive(drivePower,0,0,0,(degreesToTarget + degreesToMineral)); // Face Target
+             DriveTrain.EDrive(drivePower,0,0,0,(degreesToTarget - degreesToMineral)); // Face Target
              break;
              default:
-                 
+             DriveTrain.EDrive(drivePower,0,0,0,degreesToTarget); // Turn 45 degrees to align with image   
              }
               
              telemetry.addData("Gold Position",goldPosition);
@@ -380,7 +381,7 @@ public class ATOMAutonomousLeft extends LinearOpMode {
                       }
                       telemetry.update();
                       i++;
-                      //sleep(500);
+                      sleep(500);
                     }
                 }
        }
@@ -388,5 +389,54 @@ public class ATOMAutonomousLeft extends LinearOpMode {
                 return GoldPosition;
      }
 
-        
+     public String DetectMineral2 () {
+      
+      telemetry.addData("Detecting Mineral", "");
+      telemetry.update();
+      
+      String GoldPosition= "None";
+      /** Activate Tensor Flow Object Detection. */
+            if (tfod != null) {
+                tfod.activate();
+            }
+             double i = 0;
+       while (i < detectAttempts) {     
+         if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                      telemetry.addData("# Object Detected", updatedRecognitions.size());
+                      int goldMineralX = -1;
+                      if (updatedRecognitions.size() > 0 ) {
+                        
+                        
+                        for (Recognition recognition : updatedRecognitions) {
+                          if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                            goldMineralX = (int) recognition.getLeft();
+                            i = detectAttempts;
+                            }                            
+                            telemetry.addData("Gold Mineral Position", goldMineralX);
+                            } 
+                        }
+                        if (goldMineralX  > 700 ) {
+                            telemetry.addData("Gold Mineral Position", "Right");
+                            GoldPosition = "Right";
+                          } else if ((goldMineralX >= 250) && (goldMineralX <= 700)) {
+                            telemetry.addData("Gold Mineral Position", "Center");
+                            GoldPosition = "Center";
+                          } else {
+                            telemetry.addData("Gold Mineral Position", "Left");
+                            GoldPosition = "Left";
+                          }
+                        }
+                         telemetry.update();
+                         i++;
+                         sleep(500);
+                    }
+               
+       }
+                
+                return GoldPosition;
+     }   
 }
